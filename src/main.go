@@ -22,3 +22,5 @@ func main() {
 	log.Println("Starting simple test server on: http://localhost:8080/")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
+//Note, review mux's 
+//I'll probabably have to use gorilla/mux again like we did for Qview
