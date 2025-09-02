@@ -7,32 +7,36 @@ Cool fact, “Kubernetes” is the Greek word for a ship’s captain. So if you 
 
 For right now I get k8's as this:
 
-+-----------------------------------+
-|            Kubernetes Cluster     |
-| +-------------------------------+ |
-| |        Control Plane          | |
-| | (API Server, Scheduler, etc.) | |
-| +-------------------------------+ |
-|                                   |
-| +-------------------------------+ |
-| |        Worker Node 1          | |
-| | +---------------------------+ | |
-| | |      Kubelet, Proxy       | | |
-| | | +-----------------------+ | | |
-| | | |  Docker (Containerd)  | | | |
-| | | | +-------------------+ | | | |
-| | | | |    Docker Image   | | | | |
-| | | | | (Application + Deps)| | | |
-| | | | +-------------------+ | | | |
-| | | +-----------------------+ | | |
-| | +---------------------------+ | |
-| +-------------------------------+ |
-|                                   |
-| +-------------------------------+ |
-| |        Worker Node 2          | |
-| | (Similar to Worker Node 1)    | |
-| +-------------------------------+ |
-+-----------------------------------+
+```
+┌───────────────────────────────────┐
+│         Kubernetes Cluster        │
+├───────────────────────────────────┤
+│           Control Plane           │
+│    (API Server, Scheduler, etc.)  │
+├───────────────────────────────────┤
+│                                   │
+│           Worker Node 1           │
+│  ┌─────────────────────────────┐  │
+│  │       Kubelet, Proxy        │  │
+│  ├─────────────────────────────┤  │
+│  │    Docker (Containerd)      │  │
+│  ├─────────────────────────────┤  │
+│  │      Docker Image           │  │
+│  │   (Application + Deps)      │  │
+│  └─────────────────────────────┘  │
+├───────────────────────────────────┤
+│                                   │
+│           Worker Node 2           │
+│  ┌─────────────────────────────┐  │
+│  │       Kubelet, Proxy        │  │
+│  ├─────────────────────────────┤  │
+│  │    Docker (Containerd)      │  │
+│  ├─────────────────────────────┤  │
+│  │      Docker Image           │  │
+│  │   (Application + Deps)      │  │
+│  └─────────────────────────────┘  │
+└───────────────────────────────────┘
+```
 
 
 
@@ -66,6 +70,6 @@ src
 
 Also was reading some of Designing Data-Intensive Applications, I might try and read through more of it or at least a section every few days because its entirely about Distributed Systems.
 
-Oh and I refreshed myself on go a tiny bit
+Oh and I refreshed myself on go a tiny bit and did some network calls
 
 --------
