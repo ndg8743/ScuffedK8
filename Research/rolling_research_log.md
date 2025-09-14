@@ -90,4 +90,33 @@ https://gobyexample.com/
 
 Anyway I should just start
 
---9-13-25--
+--9-14-25--
+
+Last night I did a basic implementation of Greedy:
+    Sort pods by dominant resource (biggest first), then by priority (highest first)
+
+Referenced docs and also this yt series I found for more Go clarification:
+
+https://youtube.com/playlist?list=PLmD8u-IFdreyh6EUfevBcbiuCKzFk0EW_&si=RlCccO4JSxeZC-7Y
+
+You could also do round robin but also trying to understand http scheduling as well which I think that might use round robin
+
+So to me this is how I understand it:
+
+master node/contol plane runs an api server that has http requests controlled by mux's (simlar idea to electronics in idea but imagine for http)
+
+kubectl is the command-line tool that talks to the api server and lets you control the cluster 
+
+scheduler decides which worker node a new pod should run on
+
+controller manager watches the state of the cluster and makes sure it matches what you declared (e.g., restart pods if they crash).
+
+etcd is the key-value database that stores all cluster state.
+
+worker nodes actually run your containers inside pods. Each worker has a kubelet agent that talks to the API server, and a kube-proxy that manages networking.
+
+Node>Pod>Container (usually)
+
+what trips me up is that, what the health api would consider (network, ram, disk, etc), and all the toggles that real k8's has.
+
+I will add my full Kub setup to here to test features as well as further develop mine.
