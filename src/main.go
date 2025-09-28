@@ -9,6 +9,9 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 )
 
 const (
@@ -19,6 +22,25 @@ const (
 	// WriteTimeout is the maximum duration before timing out writes of the response
 	WriteTimeout = 15 * time.Second
 )
+
+// WebSocket upgrader for node connections
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true // Allow all origins for now
+	},
+}
+
+// Track active node connections
+var nodeConnections = make(map[string]*websocket.Conn)
+
+// Send message to a specific node
+func sendToNode(nodeID string, message interface{}) error {
+	conn, exists := nodeConnections[nodeID]
+	if !exists {
+		return fmt.Errorf("node %s not connected", nodeID)
+	}
+	return conn.WriteJSON(message)
+}
 
 // healthResponse represents the structure of a health check response
 type healthResponse struct {
@@ -56,15 +78,47 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// WebSocket handler for node connections
+func nodeWebSocketHandler(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Printf("WebSocket upgrade failed: %v", err)
+		return
+	}
+	defer conn.Close()
+
+	// Get node ID from query parameter
+	nodeID := r.URL.Query().Get("node_id")
+	if nodeID == "" {
+		log.Printf("No node_id provided")
+		return
+	}
+
+	// Store connection
+	nodeConnections[nodeID] = conn
+	log.Printf("Node %s connected", nodeID)
+
+	// Keep connection alive and handle messages
+	for {
+		_, _, err := conn.ReadMessage()
+		if err != nil {
+			log.Printf("Node %s disconnected: %v", nodeID, err)
+			delete(nodeConnections, nodeID)
+			break
+		}
+	}
+}
+
 // setupRoutes configures HTTP routes and their handlers
-func setupRoutes() *http.ServeMux {
-	mux := http.NewServeMux()
+func setupRoutes() *mux.Router {
+	r := mux.NewRouter()
 
-	mux.HandleFunc("/", rootHandler)
-	mux.HandleFunc("/health", healthHandler)
-	mux.HandleFunc("/test", healthHandler)
+	r.HandleFunc("/", rootHandler)
+	r.HandleFunc("/health", healthHandler)
+	r.HandleFunc("/test", healthHandler)
+	r.HandleFunc("/ws/node", nodeWebSocketHandler) // WebSocket endpoint for nodes
 
-	return mux
+	return r
 }
 
 // createServer creates and configures an HTTP server with proper timeouts
