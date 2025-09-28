@@ -9,9 +9,6 @@ import (
 	"log"
 	"net/http"
 	"time"
-
-	"github.com/gorilla/mux"
-	"github.com/gorilla/websocket"
 )
 
 const (
@@ -22,6 +19,16 @@ const (
 	// WriteTimeout is the maximum duration before timing out writes of the response
 	WriteTimeout = 15 * time.Second
 )
+
+// WebSocket upgrader for node connections
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true // Allow all origins for now
+	},
+}
+
+// Track active node connections
+var nodeConnections = make(map[string]*websocket.Conn)
 
 // healthResponse represents the structure of a health check response
 type healthResponse struct {
