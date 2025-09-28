@@ -52,17 +52,48 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 // healthHandler handles health check requests and returns service status
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-
+	
 	response := healthResponse{
 		Status:    "ok",
 		Timestamp: time.Now(),
 		Service:   "scuffedk8-scheduler",
 	}
-
+	
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		log.Printf("Error encoding health response: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
+	}
+}
+
+// WebSocket handler for node connections
+func nodeWebSocketHandler(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Printf("WebSocket upgrade failed: %v", err)
+		return
+	}
+	defer conn.Close()
+
+	// Get node ID from query parameter
+	nodeID := r.URL.Query().Get("node_id")
+	if nodeID == "" {
+		log.Printf("No node_id provided")
+		return
+	}
+
+	// Store connection
+	nodeConnections[nodeID] = conn
+	log.Printf("Node %s connected", nodeID)
+
+	// Keep connection alive and handle messages
+	for {
+		_, _, err := conn.ReadMessage()
+		if err != nil {
+			log.Printf("Node %s disconnected: %v", nodeID, err)
+			delete(nodeConnections, nodeID)
+			break
+		}
 	}
 }
 
