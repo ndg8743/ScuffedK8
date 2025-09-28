@@ -32,6 +32,15 @@ var upgrader = websocket.Upgrader{
 // Track active node connections
 var nodeConnections = make(map[string]*websocket.Conn)
 
+// Send message to a specific node
+func sendToNode(nodeID string, message interface{}) error {
+	conn, exists := nodeConnections[nodeID]
+	if !exists {
+		return fmt.Errorf("node %s not connected", nodeID)
+	}
+	return conn.WriteJSON(message)
+}
+
 // healthResponse represents the structure of a health check response
 type healthResponse struct {
 	Status    string    `json:"status"`
