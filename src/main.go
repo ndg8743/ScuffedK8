@@ -9,6 +9,8 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 const (
@@ -52,13 +54,13 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 // healthHandler handles health check requests and returns service status
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	
+
 	response := healthResponse{
 		Status:    "ok",
 		Timestamp: time.Now(),
 		Service:   "scuffedk8-scheduler",
 	}
-	
+
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		log.Printf("Error encoding health response: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -98,14 +100,15 @@ func nodeWebSocketHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // setupRoutes configures HTTP routes and their handlers
-func setupRoutes() *http.ServeMux {
-	mux := http.NewServeMux()
+func setupRoutes() *mux.Router {
+	r := mux.NewRouter()
 
-	mux.HandleFunc("/", rootHandler)
-	mux.HandleFunc("/health", healthHandler)
-	mux.HandleFunc("/test", healthHandler)
+	r.HandleFunc("/", rootHandler)
+	r.HandleFunc("/health", healthHandler)
+	r.HandleFunc("/test", healthHandler)
+	r.HandleFunc("/ws/node", nodeWebSocketHandler) // WebSocket endpoint for nodes
 
-	return mux
+	return r
 }
 
 // createServer creates and configures an HTTP server with proper timeouts
