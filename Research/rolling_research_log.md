@@ -115,8 +115,21 @@ etcd is the key-value database that stores all cluster state.
 
 worker nodes actually run your containers inside pods. Each worker has a kubelet agent that talks to the API server, and a kube-proxy that manages networking.
 
-Node>Pod>Container (usually)
+Node<Pod<Container (usually)
 
 what trips me up is that, what the health api would consider (network, ram, disk, etc), and all the toggles that real k8's has.
 
 I will add my full Kub setup to here to test features as well as further develop mine.
+
+--9-27-25--
+https://minikube.sigs.k8s.io/docs/tutorials/
+
+Great tutorial I went through for just how to setup minikube and it and found some info about how they still use TCP and UDP services with the nginx.
+
+Will experiment more with the other options inside it as well, https://minikube.sigs.k8s.io/docs/tutorials/nvidia/
+
+
+--9-28-25--
+I got the basic greedy scheduler working. Just sorts pods by resource requirements and finds the first node that can fit them. 
+
+Added Gorilla mux and WebSocket connections so nodes can actually talk to the scheduler. Right now it's just basic connection tracking but the foundation is there for real-time communication between the scheduler and worker nodes.
