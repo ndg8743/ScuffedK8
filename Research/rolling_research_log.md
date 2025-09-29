@@ -133,3 +133,28 @@ Will experiment more with the other options inside it as well, https://minikube.
 I got the basic greedy scheduler working. Just sorts pods by resource requirements and finds the first node that can fit them. 
 
 Added Gorilla mux and WebSocket connections so nodes can actually talk to the scheduler. Right now it's just basic connection tracking but the foundation is there for real-time communication between the scheduler and worker nodes.
+
+--9-29-25--
+
+```
+Client (ws_demo.go)          Server (main.go)
+      |                            |
+      |--- WebSocket Handshake  -->|  (HTTP Upgrade)
+      |<-- 101 Switching Protocols-|
+      |                            |
+      |                            |--- Store in nodeConnections map
+      |                            |--- Log "Node worker-1 connected"
+      |                            |
+      |--- Heartbeat JSON -------->|  (Every 2 seconds)
+      |                            |--- Log "[WS] worker-1 -> server..."
+      |                            |
+      |<-- Pod Assignment ---------|  (Future feature)
+      |                            |
+      |--- Close Connection ------>|
+      |                            |--- Remove from map
+```
+
+Updates:
+- Added `/nodes` endpoint that returns JSON of connected worker nodes
+- Added mux routing logs with `[MUX]` prefix to see request handling
+- Added WebSocket message logging with `[WS]` prefix to show heartbeat data
