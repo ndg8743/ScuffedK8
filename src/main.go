@@ -114,23 +114,23 @@ func nodeWebSocketHandler(w http.ResponseWriter, r *http.Request) {
 func nodesStatusHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[MUX] Route: %s %s", r.Method, r.URL.Path)
 	w.Header().Set("Content-Type", "application/json")
-	
+
 	type nodeStatus struct {
 		NodeID    string `json:"node_id"`
 		Connected bool   `json:"connected"`
 	}
-	
+
 	nodes := []nodeStatus{}
 	for id := range nodeConnections {
 		nodes = append(nodes, nodeStatus{NodeID: id, Connected: true})
 	}
-	
+
 	response := map[string]interface{}{
 		"total_nodes": len(nodes),
 		"nodes":       nodes,
 		"timestamp":   time.Now().Format(time.RFC3339),
 	}
-	
+
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -141,8 +141,8 @@ func setupRoutes() *mux.Router {
 	r.HandleFunc("/", rootHandler)
 	r.HandleFunc("/health", healthHandler)
 	r.HandleFunc("/test", healthHandler)
-	r.HandleFunc("/nodes", nodesStatusHandler)         // Node status endpoint
-	r.HandleFunc("/ws/node", nodeWebSocketHandler)     // WebSocket endpoint for nodes
+	r.HandleFunc("/nodes", nodesStatusHandler)     // Node status endpoint
+	r.HandleFunc("/ws/node", nodeWebSocketHandler) // WebSocket endpoint for nodes
 
 	return r
 }
