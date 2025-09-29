@@ -177,8 +177,8 @@ func setupRoutes() *mux.Router {
 
 	r.HandleFunc("/", rootHandler)
 	r.HandleFunc("/health", healthHandler)
-	r.HandleFunc("/test", healthHandler)
-	r.HandleFunc("/nodes", nodesStatusHandler)     // Node status endpoint
+	r.HandleFunc("/nodes", nodesStatusHandler)
+	r.HandleFunc("/workload", workloadHandler)  // CPU workload endpoint
 	r.HandleFunc("/ws/node", nodeWebSocketHandler) // WebSocket endpoint for nodes
 
 	return r
@@ -200,7 +200,7 @@ func main() {
 
 	log.Printf("Starting ScuffedK8 Scheduler Service on: http://localhost%s/", DefaultPort)
 	log.Printf("Health check available at: http://localhost%s/health", DefaultPort)
-	log.Printf("Legacy test endpoint available at: http://localhost%s/test", DefaultPort)
+	log.Printf("CPU workload endpoint:: http://localhost%s/workload?iterations=10000000", DefaultPort)
 
 	// TODO: Consider using gorilla/mux for more advanced routing features
 	// Example: r := mux.NewRouter(); r.HandleFunc("/api/v1/schedule", scheduleHandler).Methods("POST")
