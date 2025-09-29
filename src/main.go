@@ -136,6 +136,41 @@ func nodesStatusHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+
+// calculatePi uses Leibniz formula to compute pi - CPU intensive
+func calculatePi(iterations int) float64 {
+	pi := 0.0
+	for i := 0; i < iterations; i++ {
+		pi += math.Pow(-1, float64(i)) / (2*float64(i) + 1)
+	}
+	return pi * 4
+}
+
+// workloadHandler simulates running a CPU-intensive pod workload
+func workloadHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("[MUX] Route: %s %s", r.Method, r.URL.Path)
+	
+	iterStr := r.URL.Query().Get("iterations")
+	iterations := 10000000
+	if iterStr != "" {
+		if i, err := strconv.Atoi(iterStr); err == nil && i > 0 {
+			iterations = i
+		}
+	}
+	
+	start := time.Now()
+	result := calculatePi(iterations)
+	duration := time.Since(start)
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"workload":    "calculate_pi",
+		"iterations":  iterations,
+		"result":      result,
+		"duration_ms": duration.Milliseconds(),
+		"cpu_used":    true,
+	})
+}
 // setupRoutes configures HTTP routes and their handlers
 func setupRoutes() *mux.Router {
 	r := mux.NewRouter()
