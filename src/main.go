@@ -100,13 +100,38 @@ func nodeWebSocketHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Keep connection alive and handle messages
 	for {
-		_, _, err := conn.ReadMessage()
+		messageType, data, err := conn.ReadMessage()
 		if err != nil {
 			log.Printf("Node %s disconnected: %v", nodeID, err)
 			delete(nodeConnections, nodeID)
 			break
 		}
+		log.Printf("[WS] %s -> server (type=%d): %s", nodeID, messageType, string(data))
 	}
+}
+
+// nodesStatusHandler returns the current state of connected nodes
+func nodesStatusHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("[MUX] Route: %s %s", r.Method, r.URL.Path)
+	w.Header().Set("Content-Type", "application/json")
+	
+	type nodeStatus struct {
+		NodeID    string `json:"node_id"`
+		Connected bool   `json:"connected"`
+	}
+	
+	nodes := []nodeStatus{}
+	for id := range nodeConnections {
+		nodes = append(nodes, nodeStatus{NodeID: id, Connected: true})
+	}
+	
+	response := map[string]interface{}{
+		"total_nodes": len(nodes),
+		"nodes":       nodes,
+		"timestamp":   time.Now().Format(time.RFC3339),
+	}
+	
+	json.NewEncoder(w).Encode(response)
 }
 
 // setupRoutes configures HTTP routes and their handlers
@@ -116,7 +141,8 @@ func setupRoutes() *mux.Router {
 	r.HandleFunc("/", rootHandler)
 	r.HandleFunc("/health", healthHandler)
 	r.HandleFunc("/test", healthHandler)
-	r.HandleFunc("/ws/node", nodeWebSocketHandler) // WebSocket endpoint for nodes
+	r.HandleFunc("/nodes", nodesStatusHandler)         // Node status endpoint
+	r.HandleFunc("/ws/node", nodeWebSocketHandler)     // WebSocket endpoint for nodes
 
 	return r
 }
