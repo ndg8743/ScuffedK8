@@ -23,7 +23,7 @@ func connectNode(nodeID string) (*websocket.Conn, error) {
 	return c, nil
 }
 
-// runNode simulates a worker node that connects to the scheduler and sends periodic heartbeat messages. 
+// runNode simulates a worker node that connects to the scheduler and sends periodic heartbeat messages.
 // In real Kubernetes, nodes send status updates about their health, available resources, and running pods.
 func runNode(nodeID string, stop <-chan struct{}) {
 	c, err := connectNode(nodeID)
@@ -50,7 +50,7 @@ func runNode(nodeID string, stop <-chan struct{}) {
 	// Real kubelets send node status updates with resource availability
 	ticker := time.NewTicker(2 * time.Second)
 	defer ticker.Stop()
-	
+
 	for {
 		select {
 		case <-stop:
