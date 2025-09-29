@@ -154,6 +154,12 @@ Client (ws_demo.go)          Server (main.go)
       |                            |--- Remove from map
 ```
 
+/                → rootHandler()          // Returns "ScuffedK8\nStatus: Running"
+/health          → healthHandler()        // JSON health check with timestamp
+/nodes           → nodesStatusHandler()   // Shows connected worker nodes
+/ws/node         → nodeWebSocketHandler() // WebSocket upgrade for nodes
+/workload        → workloadHandler()       // CPU-intensive pi calculation
+
 Updates:
 - Added `/nodes` endpoint that returns JSON of connected worker nodes
 - Added mux routing logs with `[MUX]` prefix to see request handling
