@@ -18,7 +18,7 @@ import (
 
 const (
 	// DefaultPort is the default port the server listens on
-	DefaultPort = ":8080"
+	DefaultPort = ":8081"
 	// ReadTimeout is the maximum duration for reading the entire request
 	ReadTimeout = 15 * time.Second
 	// WriteTimeout is the maximum duration before timing out writes of the response
