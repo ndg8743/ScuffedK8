@@ -40,7 +40,20 @@ go run examples/ws_demo.go
 
 ## Features
 
-- Greedy pod scheduler with resource constraints
-- WebSocket node heartbeats
-- Real CPU workload simulation
-- In-memory state management
+main.go - API Server (Running on :8080)
+
+HTTP endpoints: /, /health, /nodes, /workload
+    WebSocket endpoint: /ws/node for node connections
+    CPU workload simulation (Pi calculation)
+    Connection tracking for nodes
+scheduler.go - Greedy Scheduler Algorithm
+    Pod scheduling logic (greedy algorithm)
+    Resource-based pod placement
+    Priority-based scheduling
+basic_usage.go - Scheduler Test
+    Demonstrates scheduling 3 pods to 2 nodes
+    Shows resource allocation and assignments
+ws_demo.go - Node Simulation
+    Simulates 2 worker nodes
+    WebSocket connections to API server
+    Sends heartbeat messages every 2 seconds
