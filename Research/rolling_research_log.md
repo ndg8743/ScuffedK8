@@ -164,3 +164,39 @@ Updates:
 - Added `/nodes` endpoint that returns JSON of connected worker nodes
 - Added mux routing logs with `[MUX]` prefix to see request handling
 - Added WebSocket message logging with `[WS]` prefix to show heartbeat data
+
+--9-28-25--
+
+Battleship game idea using the scheduler architecture. Turn the whole thing into a game orchestration platform where players and bots are pods that get scheduled.
+
+System architecture:
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Game Control Plane                   │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐     │
+│  │   Scheduler │  │ Game State  │  │   API       │     │
+│  │   (existing)│  │ Manager     │  │   Server    │     │
+│  │             │  │             │  │             │     │
+│  └─────────────┘  └─────────────┘  └─────────────┘     │
+└─────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────┐
+│                  Game Worker Nodes                      │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐     │
+│  │   Player    │  │    Bot      │  │    Bot      │     │
+│  │   Pod       │  │   (Easy)    │  │  (Hard)     │     │
+│  │             │  │   Pod       │  │   Pod       │     │
+│  └─────────────┘  └─────────────┘  └─────────────┘     │
+└─────────────────────────────────────────────────────────┘
+```
+
+Plan:
+1. Game state manager - track sessions, boards, turns
+2. Bot difficulty scaling - easy/medium/hard as different resource requirements  
+3. Game API endpoints - create game, join game, make moves
+4. Bot auto-scaling based on demand
+5. WebSocket communication for real-time gameplay
+6. Persistent storage for game sessions
+
+This lets me learn k8s concepts while building something interactive. Players and bots become pods that get scheduled, game sessions are like deployments, and the whole thing teaches real orchestration patterns.
