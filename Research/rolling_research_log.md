@@ -165,7 +165,7 @@ Updates:
 - Added mux routing logs with `[MUX]` prefix to see request handling
 - Added WebSocket message logging with `[WS]` prefix to show heartbeat data
 
---9-28-25--
+--10-26-25--
 
 Battleship game idea using the scheduler architecture. Turn the whole thing into a game orchestration platform where players and bots are pods that get scheduled.
 
@@ -198,5 +198,27 @@ Plan:
 4. Bot auto-scaling based on demand
 5. WebSocket communication for real-time gameplay
 6. Persistent storage for game sessions
+
+Game state sync works like this:
+
+Central state store (like etcd):
+- Game state manager holds the single source of truth
+- All moves go through the API server first
+- State changes get broadcast to all connected players via WebSocket
+- If a player disconnects and reconnects, they get the current state
+
+Flow:
+1. Player makes move → API server validates → Game state manager updates
+2. Game state manager broadcasts to all players in that game
+3. Bot pods receive state updates and calculate their response
+4. Bot response goes through same flow back to players
+
+This is like how k8s controllers watch for changes and react. The game state manager is like the API server, and the player/bot pods are like controllers that watch for state changes.
+
+State persistence:
+- Game sessions stored in memory first (like ConfigMaps)
+- Can add persistent storage later (like PersistentVolumes)
+- State snapshots for crash recovery
+- Leader election for high availability
 
 This lets me learn k8s concepts while building something interactive. Players and bots become pods that get scheduled, game sessions are like deployments, and the whole thing teaches real orchestration patterns.
