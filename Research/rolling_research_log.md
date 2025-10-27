@@ -222,3 +222,13 @@ State persistence:
 - Leader election for high availability
 
 This lets me learn k8s concepts while building something interactive. Players and bots become pods that get scheduled, game sessions are like deployments, and the whole thing teaches real orchestration patterns.
+
+Steps:
+- Implement core battleship game logic
+- Implement game session manager
+- Implement easy bot (random moves)
+- Create `cmd/game-server/main.go` entry point
+- Add game API endpoints to `pkg/api/handlers.go`
+- Integrate WebSocket support for real-time game updates
+- Create test client for playing the game
+
