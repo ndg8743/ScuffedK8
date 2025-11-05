@@ -1,4 +1,3 @@
-package apiserver
 // Package main implements the ScuffedK8 API Server
 // This is like kube-apiserver - the central management point for the cluster
 package main

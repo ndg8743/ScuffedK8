@@ -14,10 +14,10 @@ const (
 type CellState int
 
 const (
-	Empty CellState = iota // Empty water
-	Ship                   // Ship present (not hit)
-	Hit                    // Ship hit
-	Miss                   // Missed shot
+	Empty   CellState = iota // Empty water
+	HasShip                  // Ship present (not hit)
+	Hit                      // Ship hit
+	Miss                     // Missed shot
 )
 
 // Coordinate represents a position on the board
@@ -68,7 +68,7 @@ func GetStandardShips() []ShipType {
 // Board represents a player's game board
 type Board struct {
 	Grid  [BoardSize][BoardSize]CellState `json:"-"` // Don't expose internal grid in JSON
-	Ships []Ship                           `json:"ships"`
+	Ships []Ship                          `json:"ships"`
 }
 
 // NewBoard creates a new empty board
@@ -104,7 +104,7 @@ func (b *Board) PlaceShip(shipType ShipType, start Coordinate, horizontal bool) 
 		}
 
 		// Check if position is already occupied
-		if b.Grid[pos.Row][pos.Col] == Ship {
+		if b.Grid[pos.Row][pos.Col] == HasShip {
 			return fmt.Errorf("position already occupied by another ship")
 		}
 
@@ -113,7 +113,7 @@ func (b *Board) PlaceShip(shipType ShipType, start Coordinate, horizontal bool) 
 
 	// Place the ship
 	for _, pos := range positions {
-		b.Grid[pos.Row][pos.Col] = Ship
+		b.Grid[pos.Row][pos.Col] = HasShip
 	}
 
 	b.Ships = append(b.Ships, Ship{
@@ -191,7 +191,7 @@ func (b *Board) GetOpponentView() [BoardSize][BoardSize]CellState {
 		for j := 0; j < BoardSize; j++ {
 			cell := b.Grid[i][j]
 			// Hide ships that haven't been hit
-			if cell == Ship {
+			if cell == HasShip {
 				view[i][j] = Empty
 			} else {
 				view[i][j] = cell
@@ -212,7 +212,7 @@ func (b *Board) String() string {
 			switch cell {
 			case Empty:
 				sb.WriteString("~ ")
-			case Ship:
+			case HasShip:
 				sb.WriteString("S ")
 			case Hit:
 				sb.WriteString("X ")

@@ -1,4 +1,3 @@
-package api
 // Package api provides HTTP handlers for the API server
 package api
 
@@ -176,10 +175,13 @@ func (s *Server) SetupRoutes() *mux.Router {
 	return r
 }
 
-// calculatePi uses Leibniz formula - CPU intensive
+// calculatePi approximates the value of Pi using the Leibniz series:
+//   π = 4 × (1 - 1/3 + 1/5 - 1/7 + 1/9 - ...)
 func calculatePi(iterations int) float64 {
 	pi := 0.0
 	for i := 0; i < iterations; i++ {
+		// Each term is (-1)^i divided by (2i + 1)
+		// math.Pow is used here to generate the alternating sign
 		pi += math.Pow(-1, float64(i)) / (2*float64(i) + 1)
 	}
 	return pi * 4

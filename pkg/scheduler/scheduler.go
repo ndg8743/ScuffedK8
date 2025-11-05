@@ -1,5 +1,5 @@
-package scheduler
-// Package scheduler implements the pod scheduling algorithm
+// Package scheduler implements a greedy pod scheduling algorithm.
+// Assigns pods to nodes based on resource availability using a first-fit approach.
 package scheduler
 
 import (
@@ -10,41 +10,46 @@ import (
 	"scuffedk8/pkg/types"
 )
 
-// Scheduler handles pod scheduling decisions
+// Scheduler manages pod scheduling decisions.
+// Not thread-safe - access through Store for thread safety.
 type Scheduler struct {
-	nodes map[string]*types.Node
+	nodes map[string]*types.Node // node ID -> node state
 }
 
-// New creates a new Scheduler instance
+// New creates a new Scheduler instance.
 func New() *Scheduler {
 	return &Scheduler{
 		nodes: make(map[string]*types.Node),
 	}
 }
 
-// RegisterNode adds a node to the scheduler
+// RegisterNode adds a node to the scheduler.
 func (s *Scheduler) RegisterNode(node *types.Node) {
 	s.nodes[node.ID] = node
 	log.Printf("[Scheduler] Registered node %s with capacity: %v", node.ID, node.Capacity)
 }
 
-// UnregisterNode removes a node from the scheduler
+// Unregister removes a node from the scheduler.
+// Note: Does not clean up existing allocations.
 func (s *Scheduler) Unregister(nodeID string) {
 	delete(s.nodes, nodeID)
 	log.Printf("[Scheduler] Unregistered node %s", nodeID)
 }
 
-// Assign schedules pods onto available nodes using a greedy algorithm
+// Assign schedules pods to nodes using a greedy first-fit algorithm.
+//
 // Algorithm:
-//  1. Sort pods by dominant resource (largest first), then by priority
+//  1. Sort pods by dominant resource (largest first), then priority
 //  2. For each pod, find first node with sufficient resources
-//  3. Allocate pod to node and update node state
+//  3. Allocate pod to node and update allocations
+//
+// Returns assignments (podID -> nodeID), pending pods, and updated nodes.
 func (s *Scheduler) Assign(pods []types.Pod) (types.ScheduleResult, error) {
 	if len(s.nodes) == 0 {
 		return types.ScheduleResult{}, errors.New("no nodes available for scheduling")
 	}
 
-	// Convert map to slice and make copies
+	// Copy nodes to avoid modifying originals during scheduling
 	nodesList := make([]types.Node, 0, len(s.nodes))
 	for _, node := range s.nodes {
 		nodeCopy := *node
@@ -54,37 +59,42 @@ func (s *Scheduler) Assign(pods []types.Pod) (types.ScheduleResult, error) {
 		nodesList = append(nodesList, nodeCopy)
 	}
 
-	// Sort pods by resource requirements
+	// Copy and sort pods: dominant resource DESC, priority DESC, ID ASC
 	cpods := make([]types.Pod, len(pods))
 	copy(cpods, pods)
-	
+
 	sort.Slice(cpods, func(i, j int) bool {
 		domI := dominantResource(cpods[i].Request)
 		domJ := dominantResource(cpods[j].Request)
 
+		// Sort by dominant resource first (largest pods first reduces fragmentation)
 		if domI != domJ {
 			return domI > domJ
 		}
 
+		// Then by priority (higher priority first)
 		if cpods[i].Priority != cpods[j].Priority {
 			return cpods[i].Priority > cpods[j].Priority
 		}
 
+		// Finally by ID for determinism
 		return cpods[i].ID < cpods[j].ID
 	})
 
-	// Schedule pods
+	// Assign pods to nodes (first-fit greedy algorithm)
 	assignments := make(map[string]string)
 	var pending []string
 
 	for _, pod := range cpods {
 		assigned := false
 
+		// Try each node until we find one that fits
 		for i := range nodesList {
 			if !nodesList[i].Up {
 				continue
 			}
 
+			// Check if node has enough free resources
 			if nodesList[i].Free().Fits(pod.Request) {
 				nodesList[i].Allocated.Add(pod.Request)
 				assignments[pod.ID] = nodesList[i].ID
@@ -100,7 +110,7 @@ func (s *Scheduler) Assign(pods []types.Pod) (types.ScheduleResult, error) {
 		}
 	}
 
-	// Update actual node states
+	// Commit allocations to actual node states
 	for _, node := range nodesList {
 		if s.nodes[node.ID] != nil {
 			s.nodes[node.ID].Allocated = node.Allocated
@@ -114,7 +124,7 @@ func (s *Scheduler) Assign(pods []types.Pod) (types.ScheduleResult, error) {
 	}, nil
 }
 
-// GetNodes returns all registered nodes
+// GetNodes returns a copy of all registered nodes.
 func (s *Scheduler) GetNodes() []types.Node {
 	nodes := make([]types.Node, 0, len(s.nodes))
 	for _, node := range s.nodes {
@@ -123,7 +133,8 @@ func (s *Scheduler) GetNodes() []types.Node {
 	return nodes
 }
 
-// dominantResource finds the largest resource requirement
+// dominantResource returns the largest resource value in the map.
+// Used for sorting pods by their biggest resource requirement.
 func dominantResource(r types.Resources) int64 {
 	var max int64
 	for _, v := range r {

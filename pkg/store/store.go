@@ -1,4 +1,3 @@
-package store
 // Package store provides in-memory storage for cluster state
 package store
 
@@ -44,7 +43,7 @@ func (s *Store) UnregisterNode(nodeID string) {
 	defer s.mu.Unlock()
 
 	delete(s.nodes, nodeID)
-	s.scheduler.UnregisterNode(nodeID)
+	s.scheduler.Unregister(nodeID)
 }
 
 // AddNodeConnection stores a WebSocket connection for a node

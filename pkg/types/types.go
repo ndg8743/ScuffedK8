@@ -1,4 +1,3 @@
-package types
 // Package types defines the core data structures used throughout ScuffedK8
 package types
 
