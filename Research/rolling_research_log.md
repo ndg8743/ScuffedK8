@@ -232,3 +232,16 @@ Steps:
 - Integrate WebSocket support for real-time game updates
 - Create test client for playing the game
 
+--11-5-25--
+https://pkg.go.dev/k8s.io/utils#section-readme
+https://pkg.go.dev/golang.org/x/sys/cpu
+https://pkg.go.dev/k8s.io/utils/cpuset
+
+Read through these and will build battleship using these low level go packages that is used in all the k8's tools and options I researched.
+
+"As Kubernetes grows and spins functionality out of its core and into cooperating repositories like apiserver, kubectl, kubeadm, etc., the need arises for leaf repositories to house shared code and avoid cycles in repository relationships.
+This repository is intended to hold shared utilities with no Kubernetes dependencies that may be of interest to any Go project. See these instructions for moving an existing package to this repository."
+
+Seems like kind of perfect fit.
+
+Might make it command line, but this is cool https://fyne.io/ too
